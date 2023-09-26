@@ -485,5 +485,10 @@ class ProtoModule(pl.LightningModule):
         pr_auc = metrics.calculate_pr_auc(prediction=predictions, target=targets, num_classes=self.num_classes,
                                           device=self.device)
 
+        pr_auc = pr_auc.item()
         with open(os.path.join(self.logger.log_dir, 'PR_AUC_score.txt'), 'w') as metrics_file:
-            metrics_file.write(f"PR AUC: {pr_auc.cpu().numpy()}\n")
+            metrics_file.write(f"PR AUC: {pr_auc}\n")
+
+        self.log(f"test/PR AUC", pr_auc)
+        with open(os.path.join(log_dir, 'test_metrics.txt'), 'a') as metrics_file:
+            metrics_file.write(f"PR AUC: {pr_auc}\n")
