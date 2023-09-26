@@ -77,7 +77,7 @@ class ProtoModule(pl.LightningModule):
 
         # ARCHITECTURE SETUP #
 
-        pl.utilities.seed.seed_everything(seed=seed)
+        pl.seed_everything(seed=seed)
 
         # define distance measure
         self.pairwise_dist = nn.PairwiseDistance(p=2)
@@ -100,7 +100,7 @@ class ProtoModule(pl.LightningModule):
 
             # initialize linear layer for dim reduction
             # reset the seed to make sure linear layer is the same as in preprocessing
-            pl.utilities.seed.seed_everything(seed=seed)
+            pl.seed_everything(seed=seed)
             self.linear = nn.Linear(self.bert_hidden_size, self.hidden_size)
 
         # load prototype vectors
@@ -177,7 +177,7 @@ class ProtoModule(pl.LightningModule):
         return attention_vectors
 
     def setup_metrics(self):
-        self.f1 = torchmetrics.F1(threshold=0.269)
+        self.f1 = torchmetrics.F1Score(threshold=0.269)
         self.auroc_micro = metrics.FilteredAUROC(num_classes=self.num_classes, compute_on_step=False, average="micro")
         self.auroc_macro = metrics.FilteredAUROC(num_classes=self.num_classes, compute_on_step=False, average="macro")
 

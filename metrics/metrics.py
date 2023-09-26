@@ -26,7 +26,7 @@ class PR_AUC(Metric):
         self.prauc += [pr_auc.detach()]
 
     def compute(self):
-        return torch.mean(self.prauc.detach())
+        return torch.mean(self.prauc)
 
 
 class PR_AUCPerBucket(PR_AUC):
@@ -103,8 +103,8 @@ class FilteredAUROCPerBucket(AUROC):
             process_group: Optional[Any] = None,
             dist_sync_fn: Callable = None
     ):
-        super().__init__(num_classes, pos_label, average, max_fpr, compute_on_step, dist_sync_on_step, process_group,
-                         dist_sync_fn)
+        super().__init__(num_classes, pos_label, average, max_fpr, dist_sync_on_step=dist_sync_on_step, process_group=process_group,
+                         dist_sync_fn=dist_sync_fn)
         self.bucket = set(bucket)
 
     def compute(self) -> torch.Tensor:

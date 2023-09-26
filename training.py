@@ -48,7 +48,7 @@ def run_training(train_file,
                  eval_bucket_path=None,
                  few_shot_experiment=False,
                  label_column='short_codes'):
-    pl.utilities.seed.seed_everything(seed=seed)
+    pl.seed_everything(seed=seed)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
 
