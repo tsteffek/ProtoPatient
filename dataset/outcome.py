@@ -35,7 +35,7 @@ def collate_batch(featurized_samples: List[Dict]):
 
 
 def sample_to_features_multilabel(sample: pd.Series, tokenizer: PreTrainedTokenizer, labels: List[str], max_length=512,
-                                  text_column="text") -> Dict:
+                                  text_column="text", id_column="id") -> Dict:
     tokenized = tokenizer.encode_plus(sample[text_column],
                                       padding=True,
                                       truncation=True,
@@ -46,7 +46,7 @@ def sample_to_features_multilabel(sample: pd.Series, tokenizer: PreTrainedTokeni
                          "attention_mask": tokenized["attention_mask"],
                          "tokens": tokenized.encodings[0].tokens,
                          "target": sample[labels].to_numpy().astype(int),
-                         "sample_id": sample["id"]}
+                         "sample_id": sample[id_column]}
 
     if "token_type_ids" in tokenized:
         featurized_sample["token_type_ids"] = tokenized["token_type_ids"]
@@ -62,12 +62,14 @@ class OutcomeDiagnosesDataset(Dataset):
                  all_codes_path,
                  max_length=512,
                  text_column='text',
-                 label_column='short_codes'):
+                 label_column='short_codes',
+                 id_column='id'):
         self.tokenizer: PreTrainedTokenizer = tokenizer
         self.max_length = max_length
         self.text_column = text_column
+        self.id_column = id_column
 
-        self.data: DataFrame = pd.read_csv(file_path, dtype={"id": str})
+        self.data: DataFrame = pd.read_csv(file_path, dtype={id_column: str})
 
         # binarize labels
         mlb = MultiLabelBinarizer()
@@ -88,7 +90,8 @@ class OutcomeDiagnosesDataset(Dataset):
                                                           tokenizer=self.tokenizer,
                                                           labels=self.labels,
                                                           max_length=self.max_length,
-                                                          text_column=self.text_column)
+                                                          text_column=self.text_column,
+                                                          id_column=self.id_column)
         return featurized_sample
 
     def get_num_classes(self):

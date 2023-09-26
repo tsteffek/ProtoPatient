@@ -46,7 +46,8 @@ def run_training(train_file,
                  final_layer=False,
                  use_prototype_loss=False,
                  eval_bucket_path=None,
-                 few_shot_experiment=False):
+                 few_shot_experiment=False,
+                 label_column='short_codes'):
     pl.utilities.seed.seed_everything(seed=seed)
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
@@ -56,9 +57,9 @@ def run_training(train_file,
     else:
         dataset = OutcomeDiagnosesDataset
 
-    train_dataset = dataset(train_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path)
-    val_dataset = dataset(val_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path)
-    test_dataset = dataset(test_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path)
+    train_dataset = dataset(train_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path, label_column=label_column)
+    val_dataset = dataset(val_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path, label_column=label_column)
+    test_dataset = dataset(test_file, tokenizer, max_length=max_length, all_codes_path=all_labels_path, label_column=label_column)
     dataloader = {}
     for split, dataset in zip(["train", "val", "test"], [train_dataset, val_dataset, test_dataset]):
         dataloader[split] = torch.utils.data.DataLoader(dataset,
@@ -74,7 +75,7 @@ def run_training(train_file,
 
     eval_buckets = load_eval_buckets(eval_bucket_path)
 
-    if model_type is "BERT":
+    if model_type == "BERT":
         model = BertModule(pretrained_model=pretrained_model,
                            num_classes=dataset.get_num_classes(),
                            lr_features=lr_features,
@@ -88,7 +89,7 @@ def run_training(train_file,
                            eval_buckets=eval_buckets
                            )
 
-    elif model_type is "PROTO":
+    elif model_type == "PROTO":
         model = ProtoModule(pretrained_model=pretrained_model,
                             label_order_path=all_labels_path,
                             num_classes=dataset.get_num_classes(),
